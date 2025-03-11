@@ -2,8 +2,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
 import { Gavel, Scale, FileText } from "lucide-react";
+import { queryClient } from "@/lib/queryClient";
+import { useEffect } from "react";
 
 export default function Home() {
+  // Clear chat history when landing on home page
+  useEffect(() => {
+    queryClient.setQueryData(["/api/messages"], []);
+    sessionStorage.removeItem('chatSessionId');
+  }, []);
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="text-center mb-12">

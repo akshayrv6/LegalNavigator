@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { countries, categories } from "@/lib/mockLegalData";
+import { countries, categories } from "@shared/mockLegalData";
 import ChatMessage from "./ChatMessage";
 import type { Message } from "@shared/schema";
 
@@ -15,8 +15,19 @@ export default function ChatInterface() {
   const [category, setCategory] = useState("traffic");
   const { toast } = useToast();
 
+  // Generate a unique session ID for each new user
+  useEffect(() => {
+    const sessionId = Date.now().toString();
+    sessionStorage.setItem('chatSessionId', sessionId);
+    // Clear previous messages when component mounts
+    queryClient.setQueryData(["/api/messages"], []);
+  }, []);
+
   const { data: messages, isLoading } = useQuery<Message[]>({
-    queryKey: ["/api/messages"]
+    queryKey: ["/api/messages"],
+    refetchOnWindowFocus: false,
+    gcTime: 0, // Don't keep the data in cache
+    staleTime: 0 // Always fetch fresh data
   });
 
   const mutation = useMutation({
@@ -57,7 +68,7 @@ export default function ChatInterface() {
               <SelectValue placeholder="Select Country" />
             </SelectTrigger>
             <SelectContent>
-              {countries.map((c) => (
+              {countries.map((c: { code: string; name: string }) => (
                 <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
               ))}
             </SelectContent>
@@ -68,7 +79,7 @@ export default function ChatInterface() {
               <SelectValue placeholder="Select Category" />
             </SelectTrigger>
             <SelectContent>
-              {categories.map((c) => (
+              {categories.map((c: { id: string; name: string }) => (
                 <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
               ))}
             </SelectContent>
@@ -79,6 +90,10 @@ export default function ChatInterface() {
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {isLoading ? (
           <div className="text-center text-muted-foreground">Loading...</div>
+        ) : messages?.length === 0 ? (
+          <div className="text-center text-muted-foreground">
+            Start a conversation by asking a legal question
+          </div>
         ) : (
           messages?.map((msg) => (
             <ChatMessage key={msg.id} message={msg} />
