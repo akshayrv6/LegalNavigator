@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer } from "http";
 import { storage } from "./storage";
 import { chatMessageSchema } from "@shared/schema";
+import { searchWikipedia } from "../client/src/lib/wikiService";
 
 export async function registerRoutes(app: Express) {
   app.get("/api/messages", async (_req, res) => {
@@ -23,9 +24,15 @@ export async function registerRoutes(app: Express) {
       category: result.data.category
     });
 
-    // Generate mock response
+    // Get information from Wikipedia
+    const wikiInfo = await searchWikipedia(
+      `${result.data.category} ${result.data.content}`,
+      result.data.country
+    );
+
+    // Generate response with Wikipedia information
     const botMessage = await storage.createMessage({
-      content: `Legal advice for ${result.data.category} in ${result.data.country}: According to local regulations, ${result.data.content}...`,
+      content: wikiInfo,
       isUserMessage: false,
       country: result.data.country,
       category: result.data.category
