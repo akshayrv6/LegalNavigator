@@ -28,7 +28,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
           <div className="text-foreground">
             {message.content.includes('\n') ? (
               <div className="prose prose-sm dark:prose-invert">
-                <ol className="list-decimal list-inside">
+                <ol className="list-decimal list-inside space-y-2">
                   {formattedContent}
                 </ol>
               </div>

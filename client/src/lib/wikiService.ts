@@ -81,26 +81,26 @@ function formatPointByPoint(snippets: string[]): string {
 
   // If we have fewer than 15 points, add general legal principles
   const generalPrinciples = [
-    "The law requires all parties to act in good faith in legal proceedings.",
-    "Legal documents must be properly executed and authenticated to be valid.",
-    "Courts have the power to interpret and enforce legal provisions.",
-    "Ignorance of the law is not considered a valid defense.",
-    "Legal rights come with corresponding legal responsibilities.",
-    "The burden of proof varies depending on the nature of the case.",
-    "Legal precedents play a crucial role in judicial decision-making.",
-    "Statutory interpretation follows established legal principles.",
-    "Legal remedies must be proportionate to the harm suffered.",
-    "Time limitations apply to various legal actions and claims."
+    "The law requires all parties to act in good faith in legal proceedings",
+    "Legal documents must be properly executed and authenticated to be valid",
+    "Courts have the power to interpret and enforce legal provisions",
+    "Ignorance of the law is not considered a valid defense",
+    "Legal rights come with corresponding legal responsibilities",
+    "The burden of proof varies depending on the nature of the case",
+    "Legal precedents play a crucial role in judicial decision-making",
+    "Statutory interpretation follows established legal principles",
+    "Legal remedies must be proportionate to the harm suffered",
+    "Time limitations apply to various legal actions and claims"
   ];
 
   while (points.length < 15) {
     points.push(generalPrinciples[points.length % generalPrinciples.length]);
   }
 
-  // Format as numbered points
+  // Format as numbered points with proper spacing
   return points
-    .map((point, index) => `${index + 1}. ${point}`)
-    .join("\n\n");
+    .map((point, index) => `${index + 1}. ${point}.\n`)
+    .join("\n");
 }
 
 function formatLegalResponse(info: string, country: string, query: string): string {
@@ -133,5 +133,5 @@ function formatLegalResponse(info: string, country: string, query: string): stri
 
   const countryName = countryNames[country] || country;
 
-  return `In ${countryName}, regarding your question about ${query.toLowerCase()}, here are the key legal points:\n\n${cleanInfo}\n\nPlease note that this information is for general guidance only. Laws and regulations can change, and specific circumstances may vary. For definitive legal advice, please consult with a qualified legal professional in ${countryName}.`;
+  return `In ${countryName}, regarding your question about ${query.toLowerCase()}, here are the key legal points:\n\n${cleanInfo}\nPlease note that this information is for general guidance only. Laws and regulations can change, and specific circumstances may vary. For definitive legal advice, please consult with a qualified legal professional in ${countryName}.`;
 }
