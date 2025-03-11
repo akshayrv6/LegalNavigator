@@ -6,39 +6,50 @@ import { searchWikipedia } from "../client/src/lib/wikiService";
 
 export async function registerRoutes(app: Express) {
   app.get("/api/messages", async (_req, res) => {
-    const messages = await storage.getMessages();
-    res.json(messages);
+    try {
+      const messages = await storage.getMessages();
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      res.status(500).json({ error: "Failed to fetch messages" });
+    }
   });
 
   app.post("/api/messages", async (req, res) => {
-    const result = chatMessageSchema.safeParse(req.body);
-    if (!result.success) {
-      res.status(400).json({ error: "Invalid message format" });
-      return;
+    try {
+      const result = chatMessageSchema.safeParse(req.body);
+      if (!result.success) {
+        res.status(400).json({ error: "Invalid message format" });
+        return;
+      }
+
+      // Store user's message
+      const userMessage = await storage.createMessage({
+        content: result.data.content,
+        isUserMessage: true,
+        country: result.data.country,
+        category: result.data.category
+      });
+
+      // Get comprehensive legal information
+      const legalInfo = await searchWikipedia(
+        `${result.data.category} ${result.data.content}`,
+        result.data.country
+      );
+
+      // Store and return bot's response
+      const botMessage = await storage.createMessage({
+        content: legalInfo,
+        isUserMessage: false,
+        country: result.data.country,
+        category: result.data.category
+      });
+
+      res.json([userMessage, botMessage]);
+    } catch (error) {
+      console.error("Error processing message:", error);
+      res.status(500).json({ error: "Failed to process message" });
     }
-
-    const userMessage = await storage.createMessage({
-      content: result.data.content,
-      isUserMessage: true,
-      country: result.data.country,
-      category: result.data.category
-    });
-
-    // Get information from Wikipedia
-    const wikiInfo = await searchWikipedia(
-      `${result.data.category} ${result.data.content}`,
-      result.data.country
-    );
-
-    // Generate response with Wikipedia information
-    const botMessage = await storage.createMessage({
-      content: wikiInfo,
-      isUserMessage: false,
-      country: result.data.country,
-      category: result.data.category
-    });
-
-    res.json([userMessage, botMessage]);
   });
 
   return createServer(app);
