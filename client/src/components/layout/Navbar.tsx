@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { Scale } from "lucide-react";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 export default function Navbar() {
   return (
@@ -11,14 +12,15 @@ export default function Navbar() {
             <span>LegalAssist</span>
           </a>
         </Link>
-        
-        <div className="flex gap-6">
+
+        <div className="flex items-center gap-6">
           <Link href="/">
             <a className="text-foreground/80 hover:text-foreground">Home</a>
           </Link>
           <Link href="/chat">
             <a className="text-foreground/80 hover:text-foreground">Chat</a>
           </Link>
+          <ThemeToggle />
         </div>
       </div>
     </nav>

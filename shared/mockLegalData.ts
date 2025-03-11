@@ -1,4 +1,5 @@
 export const countries = [
+  { code: "IN", name: "India" },
   { code: "US", name: "United States" },
   { code: "UK", name: "United Kingdom" },
   { code: "CA", name: "Canada" },

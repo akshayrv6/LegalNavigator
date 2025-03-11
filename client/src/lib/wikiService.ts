@@ -14,6 +14,12 @@ export async function searchWikipedia(query: string, country: string): Promise<s
   try {
     // Construct a broader search query
     const searchTerm = `${query} ${country} law legal regulations`;
+
+    // For India, add specific legal terms
+    if (country === "IN") {
+      searchTerm += " Indian Constitution IPC civil criminal";
+    }
+
     const url = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(searchTerm)}&format=json&origin=*&srlimit=3`;
 
     const apiResponse = await fetch(url);
@@ -50,8 +56,10 @@ function formatLegalResponse(info: string, country: string, query: string): stri
     .replace(/\s+/g, " ")
     .trim();
 
+  const countryName = country === "IN" ? "India" : country;
+
   // Format as a natural response
-  return `In ${country}, regarding your question about ${query.toLowerCase()}, here's what I found: ${cleanInfo}
+  return `In ${countryName}, regarding your question about ${query.toLowerCase()}, here's what I found: ${cleanInfo}
 
 Please note that this information is for general guidance only. Laws and regulations can change, and specific circumstances may vary. For definitive legal advice, please consult with a qualified legal professional.`;
 }
