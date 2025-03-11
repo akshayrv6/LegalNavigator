@@ -6,6 +6,18 @@ interface ChatMessageProps {
 }
 
 export default function ChatMessage({ message }: ChatMessageProps) {
+  const formattedContent = message.content.split('\n').map((line, index) => {
+    if (line.trim().length === 0) return null;
+    if (line.match(/^\d+\./)) {
+      return (
+        <li key={index} className="mb-2 list-decimal">
+          {line.replace(/^\d+\./, '').trim()}
+        </li>
+      );
+    }
+    return <p key={index} className="mb-2">{line}</p>;
+  });
+
   return (
     <Card className={message.isUserMessage ? "ml-auto" : "mr-auto"} style={{ maxWidth: "80%" }}>
       <CardContent className="p-4">
@@ -13,7 +25,17 @@ export default function ChatMessage({ message }: ChatMessageProps) {
           <span className="text-sm text-muted-foreground">
             {message.isUserMessage ? "You" : "Legal Assistant"}
           </span>
-          <p className="text-foreground">{message.content}</p>
+          <div className="text-foreground">
+            {message.content.includes('\n') ? (
+              <div className="prose prose-sm dark:prose-invert">
+                <ol className="list-decimal list-inside">
+                  {formattedContent}
+                </ol>
+              </div>
+            ) : (
+              <p>{message.content}</p>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>

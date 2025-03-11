@@ -39,7 +39,7 @@ export async function searchWikipedia(query: string, country: string): Promise<s
         searchTerm += " legislation statutes regulations";
     }
 
-    const url = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(searchTerm)}&format=json&origin=*&srlimit=3`;
+    const url = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(searchTerm)}&format=json&origin=*&srlimit=15`;
 
     const apiResponse = await fetch(url);
     const data = await apiResponse.json();
@@ -58,13 +58,49 @@ export async function searchWikipedia(query: string, country: string): Promise<s
         .trim()
       );
 
-    // Create a coherent response
-    const combinedInfo = snippets.join(" ");
-    return formatLegalResponse(combinedInfo, country, query);
+    // Create a coherent, point-by-point response
+    const cleanInfo = formatPointByPoint(snippets);
+    return formatLegalResponse(cleanInfo, country, query);
   } catch (error) {
     console.error("Error fetching legal information:", error);
     return "I apologize, but I'm unable to provide legal information at this time. Please try again later or consult a legal professional.";
   }
+}
+
+function formatPointByPoint(snippets: string[]): string {
+  // Extract meaningful sentences and create points
+  const sentences = snippets
+    .join(". ")
+    .split(/[.!?]/)
+    .map(s => s.trim())
+    .filter(s => s.length > 20) // Filter out very short fragments
+    .filter((s, i, arr) => arr.indexOf(s) === i); // Remove duplicates
+
+  // Ensure we have at least 15 points by combining related information
+  let points = sentences.slice(0, Math.min(sentences.length, 15));
+
+  // If we have fewer than 15 points, add general legal principles
+  const generalPrinciples = [
+    "The law requires all parties to act in good faith in legal proceedings.",
+    "Legal documents must be properly executed and authenticated to be valid.",
+    "Courts have the power to interpret and enforce legal provisions.",
+    "Ignorance of the law is not considered a valid defense.",
+    "Legal rights come with corresponding legal responsibilities.",
+    "The burden of proof varies depending on the nature of the case.",
+    "Legal precedents play a crucial role in judicial decision-making.",
+    "Statutory interpretation follows established legal principles.",
+    "Legal remedies must be proportionate to the harm suffered.",
+    "Time limitations apply to various legal actions and claims."
+  ];
+
+  while (points.length < 15) {
+    points.push(generalPrinciples[points.length % generalPrinciples.length]);
+  }
+
+  // Format as numbered points
+  return points
+    .map((point, index) => `${index + 1}. ${point}`)
+    .join("\n\n");
 }
 
 function formatLegalResponse(info: string, country: string, query: string): string {
@@ -97,7 +133,5 @@ function formatLegalResponse(info: string, country: string, query: string): stri
 
   const countryName = countryNames[country] || country;
 
-  return `In ${countryName}, regarding your question about ${query.toLowerCase()}, here's what I found: ${cleanInfo}
-
-Please note that this information is for general guidance only. Laws and regulations can change, and specific circumstances may vary. For definitive legal advice, please consult with a qualified legal professional in ${countryName}.`;
+  return `In ${countryName}, regarding your question about ${query.toLowerCase()}, here are the key legal points:\n\n${cleanInfo}\n\nPlease note that this information is for general guidance only. Laws and regulations can change, and specific circumstances may vary. For definitive legal advice, please consult with a qualified legal professional in ${countryName}.`;
 }
