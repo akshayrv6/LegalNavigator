@@ -13,11 +13,30 @@ const wikiSearchResponseSchema = z.object({
 export async function searchWikipedia(query: string, country: string): Promise<string> {
   try {
     // Construct a broader search query
-    const searchTerm = `${query} ${country} law legal regulations`;
+    let searchTerm = `${query} ${country} law legal regulations`;
 
-    // For India, add specific legal terms
-    if (country === "IN") {
-      searchTerm += " Indian Constitution IPC civil criminal";
+    // Add country-specific legal terms
+    switch (country) {
+      case "IN":
+        searchTerm += " Indian Constitution IPC civil criminal";
+        break;
+      case "AE":
+        searchTerm += " UAE Federal Law Sharia";
+        break;
+      case "PK":
+        searchTerm += " Pakistan Constitution Islamic Law";
+        break;
+      case "EG":
+        searchTerm += " Egyptian Civil Code Islamic Law";
+        break;
+      case "CN":
+        searchTerm += " Chinese Constitution Supreme People's Court";
+        break;
+      case "ZA":
+        searchTerm += " South African Constitution Common Law";
+        break;
+      default:
+        searchTerm += " legislation statutes regulations";
     }
 
     const url = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(searchTerm)}&format=json&origin=*&srlimit=3`;
@@ -56,10 +75,29 @@ function formatLegalResponse(info: string, country: string, query: string): stri
     .replace(/\s+/g, " ")
     .trim();
 
-  const countryName = country === "IN" ? "India" : country;
+  // Get full country name from country code
+  const countryNames: { [key: string]: string } = {
+    "IN": "India",
+    "AE": "the United Arab Emirates",
+    "IT": "Italy",
+    "EG": "Egypt",
+    "PK": "Pakistan",
+    "AF": "Afghanistan",
+    "AR": "Argentina",
+    "NZ": "New Zealand",
+    "CH": "Switzerland",
+    "LK": "Sri Lanka",
+    "CN": "China",
+    "NP": "Nepal",
+    "BR": "Brazil",
+    "NL": "the Netherlands",
+    "ZA": "South Africa",
+    "BD": "Bangladesh"
+  };
 
-  // Format as a natural response
+  const countryName = countryNames[country] || country;
+
   return `In ${countryName}, regarding your question about ${query.toLowerCase()}, here's what I found: ${cleanInfo}
 
-Please note that this information is for general guidance only. Laws and regulations can change, and specific circumstances may vary. For definitive legal advice, please consult with a qualified legal professional.`;
+Please note that this information is for general guidance only. Laws and regulations can change, and specific circumstances may vary. For definitive legal advice, please consult with a qualified legal professional in ${countryName}.`;
 }
