@@ -29,4 +29,5 @@ export class MemStorage implements IStorage {
   }
 }
 
+// Create a new instance for each import to ensure fresh state
 export const storage = new MemStorage();

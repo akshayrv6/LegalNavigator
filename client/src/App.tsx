@@ -6,8 +6,15 @@ import Home from "@/pages/home";
 import Chat from "@/pages/chat";
 import Navbar from "@/components/layout/Navbar";
 import NotFound from "@/pages/not-found";
+import { useEffect } from "react";
 
 function Router() {
+  // Clear all chat data when the app mounts (new tab or refresh)
+  useEffect(() => {
+    queryClient.clear(); // Clear all queries in cache
+    sessionStorage.clear(); // Clear session storage
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
