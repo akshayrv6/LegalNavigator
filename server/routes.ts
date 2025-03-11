@@ -15,6 +15,16 @@ export async function registerRoutes(app: Express) {
     }
   });
 
+  app.post("/api/messages/clear", async (_req, res) => {
+    try {
+      await storage.clearMessages();
+      res.json({ message: "Chat history cleared" });
+    } catch (error) {
+      console.error("Error clearing messages:", error);
+      res.status(500).json({ error: "Failed to clear messages" });
+    }
+  });
+
   app.post("/api/messages", async (req, res) => {
     try {
       const result = chatMessageSchema.safeParse(req.body);

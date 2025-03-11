@@ -11,8 +11,18 @@ import { useEffect } from "react";
 function Router() {
   // Clear all chat data when the app mounts (new tab or refresh)
   useEffect(() => {
-    queryClient.clear(); // Clear all queries in cache
-    sessionStorage.clear(); // Clear session storage
+    const clearChat = async () => {
+      try {
+        queryClient.clear(); // Clear all queries in cache
+        sessionStorage.clear(); // Clear session storage
+        // Clear server-side messages
+        await fetch('/api/messages/clear', { method: 'POST' });
+      } catch (error) {
+        console.error('Failed to clear chat history:', error);
+      }
+    };
+
+    clearChat();
   }, []);
 
   return (
